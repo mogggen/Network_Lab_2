@@ -37,7 +37,7 @@ public class Main implements ActionListener
 
     public static void main(String[] args)
     {
-	    new Main();
+        new Main();
     }
 
     @Override
