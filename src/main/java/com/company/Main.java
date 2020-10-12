@@ -8,9 +8,9 @@ public class Main implements ActionListener
 {
     private int count = 0;
     private final JLabel label;
-    private JFrame frame;
-    private JPanel panel;
-    private JButton button;
+    private final JFrame frame;
+    private final JPanel panel;
+    private final JButton button;
 
     public Main()
     {
