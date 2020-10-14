@@ -7,7 +7,7 @@ import java.awt.event.ActionListener;
 public class Main implements ActionListener
 {
     private int count = 0;
-    private final JLabel label;
+    private final JComboBox ComboBox;
     private final JFrame frame;
     private final JPanel panel;
     private final JButton button;
@@ -16,17 +16,21 @@ public class Main implements ActionListener
     {
         frame = new JFrame();
 
-        button = new JButton("Click me");
-        button.addActionListener(this);
 
-        label = new JLabel("Number of clicks: " + count);
-        label.setSize(10, 25);
+
+        ComboBox = new JComboBox();
+        ComboBox.addItem("Skelleftea");
+        ComboBox.addItem("Kage");
+        ComboBox.addItem("Stockholm");
+
+        button = new JButton("get prognosis");
+        button.addActionListener(this);
 
         panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(100, 100, 201, 201));
         panel.setLayout(new GridLayout(0, 1));
         panel.add(button);
-        panel.add(label);
+        panel.add(ComboBox);
 
         frame.add(panel, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -42,7 +46,6 @@ public class Main implements ActionListener
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        count++;
-        label.setText("Number of clicks: " + count);
+
     }
 }
