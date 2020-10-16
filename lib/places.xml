@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<places>
+    <locality name="Skelleftea">
+        <location altitude="55" latitude="64.4444" longitude="20.9644"/>
+      </locality>
+      <locality name="Kage">
+        <location altitude="20" latitude="64.8444" longitude="20.9844"/>
+      </locality>
+      <locality name="Stockholm">
+        <location altitude="20" latitude="59.3250" longitude="18.0707"/>
+      </locality>
+</places>

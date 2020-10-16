@@ -3,6 +3,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.stream.Collectors;
 
 import org.xml.sax.SAXException;
 
@@ -14,28 +20,18 @@ import org.xml.sax.helpers.DefaultHandler;
 
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
-    //copy-paste lon= lat= from places.xml and use them to download xml for the current whether
     //set a killTimer to how frequently the prognosis will update
-    //done!
 
     //kill timer
     long timer;
-    //"<?xml version=\"1.0\" encoding=\"UTF-8\"?><places><locality name=\"Skelleftea\"><location altitude=\"55\" latitude=\"64.4444\" longitude=\"20.9644\"/></locality>      <locality name=\"Kage\">        <location altitude=\"20\" latitude=\"64.8444\" longitude=\"20.9844\"/>      </locality>      <locality name=\"Stockholm\">        <location altitude=\"20\" latitude=\"59.3250\" longitude=\"18.0707\"/>      </locality></places>"
 
 
     public static void main(String[] args) {
-        try {
-            //File inputFile = new File("");
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            UserHandler userHandler = new UserHandler();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-
         //create GUI
         GUI gui = new GUI();
+
+
+
     }
 }
 
@@ -46,13 +42,10 @@ public class Main {
         @Override
         public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
         {
-
-            if (qName.equalsIgnoreCase("student")) {
-                String rollNo = attributes.getValue("rollno");
-                System.out.println("Roll No : " + rollNo);
-            } else if (qName.equalsIgnoreCase("firstname")) {
+            if (qName.equalsIgnoreCase("places")) {
                 lon = true;
-            } else if (qName.equalsIgnoreCase("lastname")) {
+            }
+            else if (qName.equalsIgnoreCase("location")) {
                 lat = true;
             }
         }
@@ -60,7 +53,7 @@ public class Main {
         @Override
         public void endElement(String uri, String localName, String qName) throws SAXException {
 
-            if (qName.equalsIgnoreCase("student")) {
+            if (qName.equalsIgnoreCase("places")) {
                 System.out.println("End Element :" + qName);
             }
         }
@@ -130,6 +123,70 @@ class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(killTimer.getText());
+        System.out.println(getURLContent());
+        ParseXml();
+    }
+
+    String getURLContent()
+    {
+        //get longitude and latitude for selected city
+        ArrayList<Character> content = new ArrayList<>();
+        float lat = 0f;
+        float lon = 0f;
+        switch (Cities.getItemAt(Cities.getSelectedIndex()))
+        {
+            case "Skelleftea":
+                lat = 64.4444f;
+                lon = 20.9644f;
+                break;
+            case "Kage":
+                lat = 64.8444f;
+                lon = 20.9844f;
+                break;
+            case "Stockholm":
+                lat = 59.3250f;
+                lon = 18.0707f;
+                break;
+        }
+
+        //HttpURLConnection
+        try
+        {
+            URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
+            HttpURLConnection huc = (HttpURLConnection)url.openConnection();
+            huc.setRequestProperty("User-Agent", "low flying 747");
+            huc.setRequestMethod("GET");
+            InputStream website = (InputStream) huc.getContent();
+            do {
+                int next = website.read();
+                if (next > 0)
+                    content.add((char)next);
+                else {
+                    huc.disconnect();
+                    return content.stream().map(Object::toString).collect(Collectors.joining());
+                }
+            }
+            while(true);
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+        return null;
+    }
+
+    void ParseXml()
+    {
+        //parse xml
+        try {
+            File inputFile = new File("../lib/places.xml");
+            SAXParserFactory factory = SAXParserFactory.newInstance();
+            SAXParser saxParser = factory.newSAXParser();
+            UserHandler userHandler = new UserHandler();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
     }
 }
