@@ -26,48 +26,29 @@ public class Main {
     long timer;
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws SAXException {
         //create GUI
         GUI gui = new GUI();
 
 
-
+        UserHandler userHandler = new UserHandler();
     }
 }
 
     class UserHandler extends DefaultHandler {
-        boolean lon = false;
-        boolean lat = false;
-
+        String from, to;
         @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException
-        {
-            if (qName.equalsIgnoreCase("places")) {
-                lon = true;
+        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+            if(qName.equalsIgnoreCase("time")){
+                from = attributes.getValue(1).substring(11, 13);
+                to = attributes.getValue(2).substring(11, 13);
+                if (from.equals(to)) return;
+                System.out.print("kl. " + from + " - " + to);
             }
-            else if (qName.equalsIgnoreCase("location")) {
-                lat = true;
+            if(qName.equalsIgnoreCase("temperature")){
+                System.out.println("\t" + attributes.getValue(2) + " C");
             }
-        }
-
-        @Override
-        public void endElement(String uri, String localName, String qName) throws SAXException {
-
-            if (qName.equalsIgnoreCase("places")) {
-                System.out.println("End Element :" + qName);
-            }
-        }
-
-        @Override
-        public void characters(char ch[], int start, int length) throws SAXException {
-
-            if (lon) {
-                System.out.println("First Name: " + new String(ch, start, length));
-                lon = false;
-            } else if (lat) {
-                System.out.println("Last Name: " + new String(ch, start, length));
-                lat = false;
-            }
+            super.startElement(uri, localName, qName, attributes);
         }
     }
 
@@ -123,11 +104,11 @@ class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        System.out.println(getURLContent());
-        ParseXml();
+        ParseXml(getURLStream());
     }
 
-    String getURLContent()
+    //The content of the URL in String representation
+    String getURLString()
     {
         //get longitude and latitude for selected city
         ArrayList<Character> content = new ArrayList<>();
@@ -175,14 +156,54 @@ class GUI implements ActionListener {
         return null;
     }
 
-    void ParseXml()
+    //the stream received from the URL
+    InputStream getURLStream()
+    {
+        //get longitude and latitude for selected city
+        HttpURLConnection huc;
+        InputStream website = null;
+        float lat = 0f;
+        float lon = 0f;
+        switch (Cities.getItemAt(Cities.getSelectedIndex()))
+        {
+            case "Skelleftea":
+                lat = 64.4444f;
+                lon = 20.9644f;
+                break;
+            case "Kage":
+                lat = 64.8444f;
+                lon = 20.9844f;
+                break;
+            case "Stockholm":
+                lat = 59.3250f;
+                lon = 18.0707f;
+                break;
+        }
+
+        //HttpURLConnection
+        try
+        {
+            URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
+            huc = (HttpURLConnection)url.openConnection();
+            huc.setRequestProperty("User-Agent", "low flying 747");
+            huc.setRequestMethod("GET");
+            website = (InputStream) huc.getContent();
+        }
+        catch (Exception e)
+        {
+            System.out.println(e);
+        }
+        return website;
+    }
+
+    void ParseXml(InputStream stream)
     {
         //parse xml
         try {
-            File inputFile = new File("../lib/places.xml");
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser saxParser = factory.newSAXParser();
             UserHandler userHandler = new UserHandler();
+            saxParser.parse(stream, userHandler);
         }
         catch (Exception e)
         {
