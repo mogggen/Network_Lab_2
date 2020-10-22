@@ -85,7 +85,7 @@ class GUI implements ActionListener {
 
         //panel to hold all content of the GUI
         panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(100, 100, 201, 201));
+        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 201, 201));
         panel.setLayout(new GridLayout(3, 2));
 
         panel.add(desc);
@@ -107,54 +107,6 @@ class GUI implements ActionListener {
         ParseXml(getURLStream());
     }
 
-    //The content of the URL in String representation
-    String getURLString()
-    {
-        //get longitude and latitude for selected city
-        ArrayList<Character> content = new ArrayList<>();
-        float lat = 0f;
-        float lon = 0f;
-        switch (Cities.getItemAt(Cities.getSelectedIndex()))
-        {
-            case "Skelleftea":
-                lat = 64.4444f;
-                lon = 20.9644f;
-                break;
-            case "Kage":
-                lat = 64.8444f;
-                lon = 20.9844f;
-                break;
-            case "Stockholm":
-                lat = 59.3250f;
-                lon = 18.0707f;
-                break;
-        }
-
-        //HttpURLConnection
-        try
-        {
-            URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
-            HttpURLConnection huc = (HttpURLConnection)url.openConnection();
-            huc.setRequestProperty("User-Agent", "low flying 747");
-            huc.setRequestMethod("GET");
-            InputStream website = (InputStream) huc.getContent();
-            do {
-                int next = website.read();
-                if (next > 0)
-                    content.add((char)next);
-                else {
-                    huc.disconnect();
-                    return content.stream().map(Object::toString).collect(Collectors.joining());
-                }
-            }
-            while(true);
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
-        }
-        return null;
-    }
 
     //the stream received from the URL
     InputStream getURLStream()
@@ -164,6 +116,7 @@ class GUI implements ActionListener {
         InputStream website = null;
         float lat = 0f;
         float lon = 0f;
+        System.out.println(Cities.getItemAt(Cities.getSelectedIndex()) + ": ");
         switch (Cities.getItemAt(Cities.getSelectedIndex()))
         {
             case "Skelleftea":
