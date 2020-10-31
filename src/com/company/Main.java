@@ -3,7 +3,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -56,43 +55,53 @@ class GUI implements ActionListener {
     JFrame frame;
 
     JComboBox<String> Cities;
-    JTextField killTimer;
+    JTextField lifeTime;
     JButton submit;
     JLabel desc;
 
     JPanel panel;
+    JTextField manual;
+    JLabel temprature;
+
 
     public GUI()
     {
         //set window
         frame = new JFrame();
 
+        desc = new JLabel("update time in minutes: ");
+
         //get killTimer value
-        killTimer = new JTextField();
-        killTimer.addActionListener(this);
+        lifeTime = new JTextField();
+        lifeTime.addActionListener(this);
 
         //select city
         Cities = new JComboBox<String>();
         Cities.addItem("Skelleftea");
         Cities.addItem("Kage");
         Cities.addItem("Stockholm");
+        manual = new JTextField();
+        manual.addActionListener(this);
 
         //get prognosis
         submit = new JButton("get prognosis");
         submit.addActionListener(this);
+        temprature = new JLabel("temperature: ");
 
-        desc = new JLabel("update time in ms: ");
 
         //panel to hold all content of the GUI
         panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(0, 0, 201, 201));
-        panel.setLayout(new GridLayout(3, 2));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setLayout(new GridLayout(3, 3));
 
-        panel.add(desc);
-        panel.add(killTimer);
-        panel.add(Cities);
-        panel.add(submit);
+        panel.add(desc);        // row 0 cols 0
+        panel.add(lifeTime);    // row 0 cols 1
 
+        panel.add(Cities);      // row 1 cols 0
+        panel.add(manual);      // row 1 cols 1
+        panel.add(submit);      // row 1 cols 2
+
+        panel.add(temprature);
 
         //the GUI mainframe
         frame.add(panel, BorderLayout.CENTER);
