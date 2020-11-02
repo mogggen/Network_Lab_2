@@ -1,36 +1,29 @@
 package com.company;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
+
 import javax.swing.*;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
 
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
     //set a killTimer to how frequently the prognosis will update
 
-    //kill timer
-    long timer;
+    long lifespan;
 
-
-    public static void main(String[] args) throws SAXException {
-        //create GUI
-        GUI gui = new GUI();
-
-
-        UserHandler userHandler = new UserHandler();
+    public static void main(String[] args) {
+        new GUI();
     }
 }
 
@@ -61,11 +54,10 @@ class GUI implements ActionListener {
 
     JPanel panel;
     JTextField manual;
-    JLabel temprature;
+    JLabel temperature;
 
 
-    public GUI()
-    {
+    public GUI() {
         //set window
         frame = new JFrame();
 
@@ -76,7 +68,7 @@ class GUI implements ActionListener {
         lifeTime.addActionListener(this);
 
         //select city
-        Cities = new JComboBox<String>();
+        Cities = new JComboBox<>();
         Cities.addItem("Skelleftea");
         Cities.addItem("Kage");
         Cities.addItem("Stockholm");
@@ -86,7 +78,7 @@ class GUI implements ActionListener {
         //get prognosis
         submit = new JButton("get prognosis");
         submit.addActionListener(this);
-        temprature = new JLabel("temperature: ");
+        temperature = new JLabel("temperature: ");
 
 
         //panel to hold all content of the GUI
@@ -101,7 +93,7 @@ class GUI implements ActionListener {
         panel.add(manual);      // row 1 cols 1
         panel.add(submit);      // row 1 cols 2
 
-        panel.add(temprature);
+        panel.add(temperature);
 
         //the GUI mainframe
         frame.add(panel, BorderLayout.CENTER);
@@ -113,63 +105,50 @@ class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ParseXml(getURLStream());
+        try {
+            ParseXml(getURLStream());
+        } catch (ParserConfigurationException | SAXException | IOException Error) {
+            Error.printStackTrace();
+        }
     }
 
 
     //the stream received from the URL
-    InputStream getURLStream()
-    {
+    InputStream getURLStream() throws IOException {
         //get longitude and latitude for selected city
         HttpURLConnection huc;
-        InputStream website = null;
+        InputStream website;
         float lat = 0f;
         float lon = 0f;
         System.out.println(Cities.getItemAt(Cities.getSelectedIndex()) + ": ");
-        switch (Cities.getItemAt(Cities.getSelectedIndex()))
-        {
-            case "Skelleftea":
+        switch (Cities.getItemAt(Cities.getSelectedIndex())) {
+            case "Skelleftea" -> {
                 lat = 64.4444f;
                 lon = 20.9644f;
-                break;
-            case "Kage":
+            }
+            case "Kage" -> {
                 lat = 64.8444f;
                 lon = 20.9844f;
-                break;
-            case "Stockholm":
+            }
+            case "Stockholm" -> {
                 lat = 59.3250f;
                 lon = 18.0707f;
-                break;
+            }
         }
 
         //HttpURLConnection
-        try
-        {
-            URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
-            huc = (HttpURLConnection)url.openConnection();
-            huc.setRequestProperty("User-Agent", "low flying 747");
-            huc.setRequestMethod("GET");
-            website = (InputStream) huc.getContent();
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
-        }
+        URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
+        huc = (HttpURLConnection) url.openConnection();
+        huc.setRequestProperty("User-Agent", "low flying 747");
+        huc.setRequestMethod("GET");
+        website = (InputStream) huc.getContent();
         return website;
     }
 
-    void ParseXml(InputStream stream)
-    {
-        //parse xml
-        try {
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
-            UserHandler userHandler = new UserHandler();
-            saxParser.parse(stream, userHandler);
-        }
-        catch (Exception e)
-        {
-            System.out.println(e);
-        }
+    void ParseXml(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+        SAXParserFactory factory = SAXParserFactory.newInstance();
+        SAXParser saxParser = factory.newSAXParser();
+        UserHandler userHandler = new UserHandler();
+        saxParser.parse(stream, userHandler);
     }
 }
