@@ -16,6 +16,14 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
+import org.xml.sax.Attributes;
+import org.xml.sax.helpers.DefaultHandler;
+
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
     //set a killTimer to how frequently the prognosis will update
@@ -37,6 +45,7 @@ class UserHandler extends DefaultHandler {
                 from = attributes.getValue(1).substring(11, 13);
                 to = attributes.getValue(2).substring(11, 13);
                 if (from.equals(to)) return;
+                if()
                 System.out.print("kl. " + from + " - " + to);
             }
             if (qName.equalsIgnoreCase("temperature")) {
@@ -58,6 +67,8 @@ class GUI implements ActionListener {
     JLabel desc;
 
     JPanel panel;
+    JTextField manual;
+    JLabel city;
     JTextField hour;
     JLabel temperature;
 
@@ -67,7 +78,7 @@ class GUI implements ActionListener {
         //set window
         frame = new JFrame();
 
-        desc = new JLabel("update time in minutes: ");
+        desc = new JLabel("lifetime in minutes: ");
 
         //get lifespan value
         lifeTime = new JTextField();
@@ -84,6 +95,7 @@ class GUI implements ActionListener {
         //get prognosis
         submit = new JButton("get prognosis");
         submit.addActionListener(this);
+        city = new JLabel(manual.getText());
         temperature = new JLabel("temperature in ");
 
 
