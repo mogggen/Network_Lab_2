@@ -16,20 +16,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.SAXParser;
-import javax.xml.parsers.SAXParserFactory;
-
-import org.xml.sax.Attributes;
-import org.xml.sax.helpers.DefaultHandler;
-
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
-    //set a killTimer to how frequently the prognosis will update
 
-    Timer timer;
-    long lifespan;
+    public static String start, stop; //to filter the outPutStream
 
     public static void main(String[] args) {
         new GUI();
@@ -37,23 +27,20 @@ public class Main {
 }
 
 class UserHandler extends DefaultHandler {
-        String from, to;
-
-        @Override
-        public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-            if (qName.equalsIgnoreCase("time")) {
-                from = attributes.getValue(1).substring(11, 13);
-                to = attributes.getValue(2).substring(11, 13);
-                if (from.equals(to)) return;
-                if()
-                System.out.print("kl. " + from + " - " + to);
-            }
-            if (qName.equalsIgnoreCase("temperature")) {
-                System.out.println("\t" + attributes.getValue(2) + " C");
-            }
-            super.startElement(uri, localName, qName, attributes);
+    @Override
+    public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
+        if (qName.equalsIgnoreCase("time")) {
+            Main.start = attributes.getValue(1).substring(11, 13);
+            Main.stop = attributes.getValue(2).substring(11, 13);
+            if (Main.start.equals(Main.stop)) return;
+            System.out.print("kl. " + Main.start + " - " + Main.stop);
         }
+        if (qName.equalsIgnoreCase("temperature")) {
+            System.out.println("\t" + attributes.getValue(2) + " C");
+        }
+        super.startElement(uri, localName, qName, attributes);
     }
+}
 
 class GUI implements ActionListener {
     long lifespan;
@@ -71,8 +58,6 @@ class GUI implements ActionListener {
     JLabel city;
     JTextField hour;
     JLabel temperature;
-
-
 
     public GUI() {
         //set window
@@ -95,9 +80,8 @@ class GUI implements ActionListener {
         //get prognosis
         submit = new JButton("get prognosis");
         submit.addActionListener(this);
-        city = new JLabel(manual.getText());
+        city = new JLabel();
         temperature = new JLabel("temperature in ");
-
 
         //panel to hold all content of the GUI
         panel = new JPanel();
@@ -124,19 +108,17 @@ class GUI implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         try {
-                ParseXml(getURLStream());
-                timer.start();
+            ParseXml(getURLStream(), Main.start, Main.stop);
+            timer.start();
         } catch (ParserConfigurationException | SAXException | IOException Error) {
             Error.printStackTrace();
         }
     }
 
     InputStream getURLStream() throws IOException {
-        float lat, lon; lat = lon = 0f;
-        HttpURLConnection huc;
-        InputStream website;
+        float lat = 0f, lon = 0f;
+        temperature.setText("temperature in " + Cities.getItemAt(Cities.getSelectedIndex()) + ": ");
 
-        System.out.println(Cities.getItemAt(Cities.getSelectedIndex()) + ": ");
         switch (Cities.getItemAt(Cities.getSelectedIndex())) {
             case "Skelleftea" -> {
                 lat = 64.4444f;
@@ -154,14 +136,13 @@ class GUI implements ActionListener {
 
         //HttpURLConnection
         URL url = new URL("https://api.met.no/weatherapi/locationforecast/2.0/classic?lat=" + lat + "&lon=" + lon);
-        huc = (HttpURLConnection) url.openConnection();
+        HttpURLConnection huc = (HttpURLConnection) url.openConnection();
         huc.setRequestProperty("User-Agent", "low flying 747");
         huc.setRequestMethod("GET");
-        website = (InputStream) huc.getContent();
-        return website;
+        return (InputStream) huc.getContent();
     }
 
-    void ParseXml(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+    void ParseXml(InputStream stream, String start, String stop) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory = SAXParserFactory.newInstance();
         SAXParser saxParser = factory.newSAXParser();
         UserHandler userHandler = new UserHandler();
