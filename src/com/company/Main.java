@@ -4,8 +4,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.Timer;
-import java.util.TimerTask;
 import javax.swing.*;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -50,8 +48,7 @@ class UserHandler extends DefaultHandler {
 
 class GUI implements ActionListener {
     long lifespan;
-    Timer timer = new Timer();
-    TimerTask timerTask;
+    Timer timer;
 
     JFrame frame;
 
@@ -114,9 +111,9 @@ class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        timer.schedule(timerTask, lifespan);
         try {
                 ParseXml(getURLStream());
+                timer.start();
         } catch (ParserConfigurationException | SAXException | IOException Error) {
             Error.printStackTrace();
         }
