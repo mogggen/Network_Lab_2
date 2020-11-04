@@ -33,6 +33,8 @@ class UserHandler extends DefaultHandler {
             Main.start = attributes.getValue(1).substring(11, 13);
             Main.stop = attributes.getValue(2).substring(11, 13);
         }
+        if (Main.start.equals(Main.stop){
+            Main.start = Main.stop = "";
         if (qName.equalsIgnoreCase("temperature") && Main.start.equals(Main.tempForTime)
         && Integer.parseInt(Main.stop) - Integer.parseInt(Main.start) == 1) {
             System.out.println("\t" + attributes.getValue(2) + " C");
