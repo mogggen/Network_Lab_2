@@ -114,7 +114,6 @@ class GUI implements ActionListener {
         if (e.getID() == 1001) {
             Main.lifeSpan = Integer.parseUnsignedInt(tfdLifeSpan.getText());
             Main.hourForTemp = tfdHour.getText();
-            System.out.println("out");
             try {
                 ParseXml(getURLStream());
                 Main.lifeSpan = Integer.parseInt(tfdLifeSpan.getText());
@@ -123,11 +122,11 @@ class GUI implements ActionListener {
                 Error.printStackTrace();
             }
         }
-        System.out.println("kikd");
         if (!Main.start.equals(""))
             Main.timer.stop();
         Main.timer = new Timer(Main.lifeSpan, this);
         Main.timer.start();
+        System.out.println("updated");
     }
 
 
