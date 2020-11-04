@@ -19,11 +19,13 @@ import java.net.URL;
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
     public static String start = "", hourForTemp = "", temp = ""; //to filter the outPutStream
-    public static int lifeSpan = 0;
+    public static int lifeSpan = Integer.MAX_VALUE;
     public static Timer timer;
-    public static GUI gui;
     public static void main(String[] args) {
-        gui = new GUI();
+        GUI gui = new GUI();
+        star:
+        Main.timer = new Timer(Main.lifeSpan, gui);
+        Main.timer.start();
     }
 }
 
@@ -46,7 +48,6 @@ class UserHandler extends DefaultHandler {
 }
 
 class GUI implements ActionListener {
-    ActionListener actionListener = this;
     JFrame frame;
 
     JComboBox<String> cbxCities;
@@ -68,7 +69,7 @@ class GUI implements ActionListener {
 
         //get lifespan value
         tfdLifeSpan = new JTextField();
-        tfdLifeSpan.addActionListener(actionListener);
+        tfdLifeSpan.addActionListener(this);
 
         //select city
         cbxCities = new JComboBox<>();
@@ -112,7 +113,7 @@ class GUI implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getID() == 1001) {
-
+            Main.lifeSpan = Integer.parseUnsignedInt(tfdLifeSpan.getText());
             Main.hourForTemp = tfdHour.getText();
             System.out.println("out");
             try {
@@ -122,11 +123,12 @@ class GUI implements ActionListener {
             } catch (ParserConfigurationException | SAXException | IOException Error) {
                 Error.printStackTrace();
             }
-            System.out.println("now");
-            Main.timer = new Timer(Main.lifeSpan, Main.gui.actionListener);
-            Main.timer.start();
-            System.out.println("after");
         }
+        System.out.println("kikd");
+        if (!Main.start.equals(""))
+            Main.timer.stop();
+        Main.timer = new Timer(Main.lifeSpan, this);
+        Main.timer.start();
     }
 
 
