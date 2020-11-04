@@ -23,7 +23,6 @@ public class Main {
     public static Timer timer;
     public static void main(String[] args) {
         GUI gui = new GUI();
-        star:
         Main.timer = new Timer(Main.lifeSpan, gui);
         Main.timer.start();
     }
