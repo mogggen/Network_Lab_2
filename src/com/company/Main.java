@@ -18,34 +18,35 @@ import java.net.URL;
 
 public class Main {
     //https://www.tutorialspoint.com/java_xml/java_sax_parse_document.htm : adjust test code to your needs
-
-    public static String start, stop, tempForTime; //to filter the outPutStream
-
+    public static String start = "", hourForTemp = "", temp = ""; //to filter the outPutStream
+    public static int lifeSpan = 0;
+    public static Timer timer;
+    public static GUI gui;
     public static void main(String[] args) {
-        new GUI();
+        gui = new GUI();
     }
 }
 
 class UserHandler extends DefaultHandler {
+    boolean found = false;
     @Override
     public void startElement(String uri, String localName, String qName, Attributes attributes) throws SAXException {
-        if (qName.equalsIgnoreCase("time")) {
+        if (qName.equalsIgnoreCase("time") && !found) {
             Main.start = attributes.getValue(1).substring(11, 13);
-            Main.stop = attributes.getValue(2).substring(11, 13);
+
         }
-        if (Main.start.equals(Main.stop){
-            Main.start = Main.stop = "";
-        if (qName.equalsIgnoreCase("temperature") && Main.start.equals(Main.tempForTime)
-        && Integer.parseInt(Main.stop) - Integer.parseInt(Main.start) == 1) {
-            System.out.println("\t" + attributes.getValue(2) + " C");
+
+        if (qName.equalsIgnoreCase("temperature") &&
+                Main.start.equals(Main.hourForTemp) && !found) {
+            Main.temp = attributes.getValue(2);
+            found = true;
         }
         super.startElement(uri, localName, qName, attributes);
     }
 }
 
 class GUI implements ActionListener {
-    long lifespan;
-
+    ActionListener actionListener = this;
     JFrame frame;
 
     JComboBox<String> cbxCities;
@@ -62,11 +63,12 @@ class GUI implements ActionListener {
         //set window
         frame = new JFrame();
 
+
         lblLifeSpan = new JLabel("lifetime in ms: ");
 
         //get lifespan value
         tfdLifeSpan = new JTextField();
-        tfdLifeSpan.addActionListener(this);
+        tfdLifeSpan.addActionListener(actionListener);
 
         //select city
         cbxCities = new JComboBox<>();
@@ -86,7 +88,7 @@ class GUI implements ActionListener {
 
         //panel to hold all content of the GUI
         panel = new JPanel();
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 100));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 100, 20, 200));
         panel.setLayout(new GridLayout(4, 2));
 
         panel.add(lblLifeSpan);    // row 0 cols 0
@@ -109,20 +111,27 @@ class GUI implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Main.tempForTime = tfdHour.getText();
-        try {
-            while(true) {
-                ParseXml(getURLStream(), Main.start, Main.stop);
-                Thread.sleep(Integer.parseInt(tfdLifeSpan.getText()));
+        if (e.getID() == 1001) {
+
+            Main.hourForTemp = tfdHour.getText();
+            System.out.println("out");
+            try {
+                ParseXml(getURLStream());
+                Main.lifeSpan = Integer.parseInt(tfdLifeSpan.getText());
+                temperature.setText("temperature in " + cbxCities.getItemAt(cbxCities.getSelectedIndex()) + " at: " + Main.start + " is " + Main.temp + "C");
+            } catch (ParserConfigurationException | SAXException | IOException Error) {
+                Error.printStackTrace();
             }
-        } catch (ParserConfigurationException | SAXException | IOException | InterruptedException Error) {
-            Error.printStackTrace();
+            System.out.println("now");
+            Main.timer = new Timer(Main.lifeSpan, Main.gui.actionListener);
+            Main.timer.start();
+            System.out.println("after");
         }
     }
 
+
     InputStream getURLStream() throws IOException {
         float lat = 0f, lon = 0f;
-        temperature.setText("temperature in " + cbxCities.getItemAt(cbxCities.getSelectedIndex()) + ": ");
 
         switch (cbxCities.getItemAt(cbxCities.getSelectedIndex())) {
             case "Skelleftea" -> {
@@ -147,15 +156,15 @@ class GUI implements ActionListener {
         return (InputStream) huc.getContent();
     }
 
-    void ParseXml(InputStream stream, String start, String stop) throws ParserConfigurationException, SAXException, IOException {
+    void ParseXml(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
         SAXParserFactory factory;
         SAXParser saxParser;
         UserHandler userHandler;
-        if (true) {
-            factory = SAXParserFactory.newInstance();
-            saxParser = factory.newSAXParser();
-            userHandler = new UserHandler();
-            saxParser.parse(stream, userHandler);
-        }
+
+        factory = SAXParserFactory.newInstance();
+        saxParser = factory.newSAXParser();
+        userHandler = new UserHandler();
+        saxParser.parse(stream, userHandler);
+
     }
 }
